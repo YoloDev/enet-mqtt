@@ -13,9 +13,5 @@
   "schema": {
     "gateway": "str",
     "mqtt-broker": "str"
-  },
-  "build_from": {
-    "amd64": "homeassistant/amd64-base-ubuntu:18.04",
-    "i386": "homeassistant/i386-base-ubuntu:18.04"
   }
 }
