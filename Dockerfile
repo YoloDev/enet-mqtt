@@ -1,4 +1,10 @@
 #########################################################################
+# GLOBAL ARGS
+#########################################################################
+
+ARG BUILD_FROM=debian:buster-slim
+
+#########################################################################
 # BUILDER
 #########################################################################
 
@@ -23,7 +29,6 @@ RUN cargo build --package ${package} --release --locked --bin ${package} --targe
 # FINAL IMAGE
 #########################################################################
 
-ARG BUILD_FROM=debian:buster-slim
 FROM $BUILD_FROM
 ARG package=enet-mqtt
 ARG APP=/usr/src/${package}
