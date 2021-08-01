@@ -1,0 +1,19 @@
+---
+name: eNet MQTT Bridge
+version: 0.1.0
+slug: enet_mqtt
+description: eNet MQTT bridge
+arch:
+  - amd64
+# - i386
+startup: application
+boot: auto
+options:
+  gateway:
+  mqtt-broker:
+schema:
+  gateway: str
+  mqtt-broker: str
+build_from:
+  amd64: amd64-base-ubuntu
+  i386: i386-base-ubuntu
