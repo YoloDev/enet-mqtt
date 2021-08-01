@@ -16,5 +16,5 @@ jobs:
           args: |
             --test \
             --all \
-            --target addon-folder \
+            --target . \
             --docker-hub yolodev
