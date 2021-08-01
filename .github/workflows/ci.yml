@@ -15,7 +15,7 @@ jobs:
         with:
           args: |
             --test \
-            --all \
+            --amd64 \
             --target . \
             --image enet-mqtt-{arch} \
             --docker-hub yolodev
