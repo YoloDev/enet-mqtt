@@ -17,4 +17,5 @@ jobs:
             --test \
             --all \
             --target . \
+            --image enet-mqtt-{arch} \
             --docker-hub yolodev
