@@ -1,0 +1,19 @@
+[package]
+name = "enet-mqtt"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-stream = "0.3"
+clap = "3.0.0-beta.2"
+color-eyre = "0.5"
+enet-client = "0.1"
+eventuals = "0.6"
+futures = "0.3"
+paho-mqtt = "0.9"
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.2"

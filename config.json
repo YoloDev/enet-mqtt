@@ -1,0 +1,17 @@
+{
+  "name": "eNet MQTT Bridge",
+  "version": "0.1.0",
+  "slug": "enet_mqtt",
+  "description": "eNet MQTT bridge",
+  "arch": ["amd64", "i386"],
+  "startup": "application",
+  "boot": "auto",
+  "options": {
+    "gateway": null,
+    "mqtt-broker": null
+  },
+  "schema": {
+    "gateway": "str",
+    "mqtt-broker": "str"
+  }
+}
