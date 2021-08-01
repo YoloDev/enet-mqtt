@@ -15,7 +15,7 @@
     "mqtt-broker": "str"
   },
   "build_from": {
-    "amd64": "amd64-base-ubuntu",
-    "i386": "i386-base-ubuntu"
+    "amd64": "homeassistant/amd64-base-ubuntu:20.04",
+    "i386": "homeassistant/i386-base-ubuntu:20.04"
   }
 }
