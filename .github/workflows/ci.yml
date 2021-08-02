@@ -17,3 +17,9 @@ jobs:
 
       - name: 🔨 Build
         run: earthly +all
+
+      - name: 🔼 Upload build as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: build/
