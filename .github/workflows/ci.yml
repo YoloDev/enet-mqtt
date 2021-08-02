@@ -1,6 +1,6 @@
 on: [push, pull_request]
 
-name: Continous Integration
+name: CI
 jobs:
   image:
     name: Create image
