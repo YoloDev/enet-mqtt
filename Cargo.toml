@@ -12,8 +12,11 @@ color-eyre = "0.5"
 enet-client = "0.1"
 eventuals = "0.6"
 futures = "0.3"
-paho-mqtt = "0.9"
+paho-mqtt = { version = "0.9", features = ["vendored-ssl"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = "0.2"
+
+[profile.release]
+lto = true
