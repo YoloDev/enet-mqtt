@@ -12,22 +12,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🔽 Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.10
-        with:
-          versionSpec: "5.x"
-
-      - name: 🔽 Install QEMU
-        uses: docker/setup-qemu-action@v1
-
       - name: 🔽 Download latest earthly
         run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.5.20/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
-
-      - name: 🔍 Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.10
-        with:
-          useConfigFile: true
 
       - name: 🔨 Build
         run: earthly +all
