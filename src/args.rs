@@ -1,4 +1,4 @@
-use clap::Clap;
+use clap::{AppSettings, Clap};
 
 #[derive(Clap, Debug, PartialEq, Clone, Copy)]
 pub enum LogFormat {
@@ -7,6 +7,7 @@ pub enum LogFormat {
 }
 
 #[derive(Debug, Clap)]
+#[clap(setting = AppSettings::ColoredHelp)]
 pub struct Args {
   /// Log output format
   #[clap(
