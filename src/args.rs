@@ -1,5 +1,5 @@
-use clap::{AppSettings, Clap};
-use paho_mqtt::{ConnectOptions, ConnectOptionsBuilder, CreateOptions, CreateOptionsBuilder};
+use clap::{AppSettings, ArgSettings, Clap};
+use paho_mqtt::{ConnectOptions, ConnectOptionsBuilder};
 
 #[derive(Clap, Debug, PartialEq, Clone, Copy)]
 pub enum LogFormat {
@@ -83,7 +83,8 @@ pub struct MqttAuth {
     long = "mqtt-pass",
     short = 's',
     env = "ENET_MQTT_PASS",
-    requires = "username"
+    requires = "username",
+    setting = ArgSettings::HideEnvValues
   )]
   pub password: Option<String>,
 }
