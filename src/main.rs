@@ -10,7 +10,7 @@ use enet_client::{
 };
 use evlist::EvList;
 use futures::StreamExt;
-use paho_mqtt::{AsyncClient, Message};
+use paho_mqtt::{AsyncClient, CreateOptions, Message};
 use serde_json::json;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
@@ -21,8 +21,8 @@ async fn main() -> Result<(), Report> {
   setup(args.log_format)?;
 
   let client = EnetClient::new(args.gateway).await?;
-  let mqtt = AsyncClient::new(args.mqtt_broker)?;
-  mqtt.connect(None).await?;
+  let mqtt = AsyncClient::new(CreateOptions::new())?;
+  mqtt.connect(args.mqtt).await?;
 
   let mut subscriptions = Vec::new();
   for device in client.devices() {
