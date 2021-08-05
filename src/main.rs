@@ -20,9 +20,21 @@ async fn main() -> Result<(), Report> {
   let args = Args::parse();
   setup(args.log_format)?;
 
+  info!("Connecting to eNet gateway {}.", args.gateway);
   let client = EnetClient::new(args.gateway).await?;
-  let mqtt = AsyncClient::new(CreateOptions::new()).wrap_err("failed to connect to mqtt")?;
-  mqtt.connect(args.mqtt).await?;
+  info!("eNet client ready.");
+
+  info!(
+    "Connecting to MQTT broker {}:{} with user '{}'",
+    args.mqtt.host,
+    args.mqtt.port,
+    args.mqtt.auth.username.as_deref().unwrap_or("<no user>")
+  );
+  let mqtt = AsyncClient::new(CreateOptions::new()).wrap_err("Failed to create mqtt client.")?;
+  mqtt
+    .connect(args.mqtt)
+    .await
+    .wrap_err("Failed to connect to mqtt.")?;
 
   let mut subscriptions = Vec::new();
   for device in client.devices() {
