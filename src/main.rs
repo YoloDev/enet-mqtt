@@ -3,7 +3,7 @@ mod evlist;
 
 use args::{Args, LogFormat};
 use clap::Clap;
-use color_eyre::Report;
+use color_eyre::{eyre::Context, Report};
 use enet_client::{
   dev::{DeviceKind, OnValue},
   EnetClient,
@@ -21,7 +21,7 @@ async fn main() -> Result<(), Report> {
   setup(args.log_format)?;
 
   let client = EnetClient::new(args.gateway).await?;
-  let mqtt = AsyncClient::new(CreateOptions::new())?;
+  let mqtt = AsyncClient::new(CreateOptions::new()).wrap_err("failed to connect to mqtt")?;
   mqtt.connect(args.mqtt).await?;
 
   let mut subscriptions = Vec::new();
