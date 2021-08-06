@@ -25,10 +25,11 @@ async fn main() -> Result<(), Report> {
   info!("eNet client ready.");
 
   info!(
-    "Connecting to MQTT broker {}:{} with user '{}'",
+    "Connecting to MQTT broker {}:{} with user '{}' and has-password: {}",
     args.mqtt.host,
     args.mqtt.port,
-    args.mqtt.auth.username.as_deref().unwrap_or("<no user>")
+    args.mqtt.auth.username.as_deref().unwrap_or("<no user>"),
+    args.mqtt.auth.password.is_some(),
   );
   let mqtt = AsyncClient::new(CreateOptions::new()).wrap_err("Failed to create mqtt client.")?;
   mqtt
