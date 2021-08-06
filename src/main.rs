@@ -32,8 +32,13 @@ async fn main() -> Result<(), Report> {
     args.mqtt.auth.password.is_some(),
   );
   let mqtt = AsyncClient::new(CreateOptions::new()).wrap_err("Failed to create mqtt client.")?;
+  let connect_options = args
+    .mqtt
+    .into_connect_options()
+    .await
+    .wrap_err("Failed to create connect options.")?;
   mqtt
-    .connect(args.mqtt)
+    .connect(connect_options)
     .await
     .wrap_err("Failed to connect to mqtt.")?;
 

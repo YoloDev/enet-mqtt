@@ -1,5 +1,7 @@
 use clap::{AppSettings, ArgSettings, Clap};
+use color_eyre::{eyre::Context, Result};
 use paho_mqtt::{ConnectOptions, ConnectOptionsBuilder};
+use tokio::net::lookup_host;
 use tracing::{event, Level};
 
 #[derive(Clap, Debug, PartialEq, Clone, Copy)]
@@ -43,39 +45,45 @@ pub struct Mqtt {
     env = "ENET_MQTT_PORT",
     default_value = "1883"
   )]
-  pub port: u32,
+  pub port: u16,
 
   /// MQTT auth.
   #[clap(flatten)]
   pub auth: MqttAuth,
 }
 
-impl From<Mqtt> for ConnectOptions {
-  fn from(val: Mqtt) -> Self {
-    let mut builder = ConnectOptionsBuilder::new();
-    let uri = format!("tcp://{}:{}", val.host, val.port);
+impl Mqtt {
+  pub async fn into_connect_options(self) -> Result<ConnectOptions> {
+    let Self { host, port, auth } = self;
+    let hosts = lookup_host((&*host, port))
+      .await
+      .wrap_err_with(|| format!("Failed to resolve host '{}'", host))?;
 
-    builder.server_uris(&[&*uri]);
-    if let Some(username) = val.auth.username {
+    let mut builder = ConnectOptionsBuilder::new();
+
+    let mut uris = Vec::with_capacity(4);
+    for host in hosts {
+      let uri = format!("tcp://{}", host);
+      uris.push(uri);
+    }
+
+    builder.server_uris(&*uris);
+    if let Some(username) = auth.username {
       builder.user_name(username);
     }
 
-    if let Some(password) = val.auth.password {
+    if let Some(password) = auth.password {
       builder.password(password);
     }
 
     event!(
       Level::INFO,
-      mqtt.uri = &*uri,
+      mqtt.uris.len = uris.len(),
+      mqtt.uris = ?uris,
       "creating mqtt connect options",
     );
-    builder.finalize()
-  }
-}
 
-impl From<Mqtt> for Option<ConnectOptions> {
-  fn from(val: Mqtt) -> Self {
-    Some(val.into())
+    Ok(builder.finalize())
   }
 }
 
