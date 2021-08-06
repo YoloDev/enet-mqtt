@@ -220,9 +220,9 @@ dependencies = [
 
 [[package]]
 name = "enet-client"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f837b6d93ce1d1ff5609e5963e3f2b5c3e6bacf97404e3662a5cfe5f07ab2223"
+checksum = "e737cb345f15c5519226bb47ded84cf3dd760bd0d524f99db161bb23a16951b3"
 dependencies = [
  "bytes",
  "enet-proto",
@@ -258,9 +258,9 @@ dependencies = [
 
 [[package]]
 name = "enet-proto"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51ad9daa902f2d22271cc3db83e0e8c06e3626ded1583f3c863bb5c320ddf890"
+checksum = "fee5afdf7ba6d6b5d34d981f37770fab1d50633bfeb85396a71d8d44e90faea0"
 dependencies = [
  "bytes",
  "color-eyre",
