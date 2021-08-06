@@ -1,5 +1,6 @@
 use clap::{AppSettings, ArgSettings, Clap};
 use paho_mqtt::{ConnectOptions, ConnectOptionsBuilder};
+use tracing::{event, Level};
 
 #[derive(Clap, Debug, PartialEq, Clone, Copy)]
 pub enum LogFormat {
@@ -52,8 +53,9 @@ pub struct Mqtt {
 impl From<Mqtt> for ConnectOptions {
   fn from(val: Mqtt) -> Self {
     let mut builder = ConnectOptionsBuilder::new();
+    let uri = format!("tcp://{}:{}", val.host, val.port);
 
-    builder.server_uris(&[format!("mqtt://{}:{}", val.host, val.port)]);
+    builder.server_uris(&[&*uri]);
     if let Some(username) = val.auth.username {
       builder.user_name(username);
     }
@@ -62,6 +64,11 @@ impl From<Mqtt> for ConnectOptions {
       builder.password(password);
     }
 
+    event!(
+      Level::INFO,
+      mqtt.uri = &*uri,
+      "creating mqtt connect options",
+    );
     builder.finalize()
   }
 }
