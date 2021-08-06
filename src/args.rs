@@ -80,7 +80,7 @@ impl Mqtt {
       Level::INFO,
       mqtt.uris.len = uris.len(),
       mqtt.uris = ?uris,
-      "creating mqtt connect options",
+      "Creating mqtt connect options",
     );
 
     Ok(builder.finalize())

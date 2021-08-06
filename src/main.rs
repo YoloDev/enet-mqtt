@@ -1,19 +1,24 @@
 mod args;
 mod evlist;
+mod mqtt_messages;
 
 use args::{Args, LogFormat};
+use async_stream::stream;
 use clap::Clap;
 use color_eyre::{eyre::Context, Report};
 use enet_client::{
-  dev::{DeviceKind, OnValue},
+  dev::{Device, DeviceKind, DeviceValue, OnValue},
   EnetClient,
 };
 use evlist::EvList;
-use futures::StreamExt;
+use futures::{pin_mut, stream::select, Stream, StreamExt};
 use paho_mqtt::{AsyncClient, CreateOptions, Message};
 use serde_json::json;
-use tracing::info;
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver};
+use tracing::{info, warn};
 use tracing_subscriber::EnvFilter;
+
+use crate::mqtt_messages::MqttMessage;
 
 #[tokio::main]
 async fn main() -> Result<(), Report> {
@@ -21,7 +26,7 @@ async fn main() -> Result<(), Report> {
   setup(args.log_format)?;
 
   info!("Connecting to eNet gateway {}.", args.gateway);
-  let client = EnetClient::new(args.gateway).await?;
+  let mut client = EnetClient::new(args.gateway).await?;
   info!("eNet client ready.");
 
   info!(
@@ -31,7 +36,8 @@ async fn main() -> Result<(), Report> {
     args.mqtt.auth.username.as_deref().unwrap_or("<no user>"),
     args.mqtt.auth.password.is_some(),
   );
-  let mqtt = AsyncClient::new(CreateOptions::new()).wrap_err("Failed to create mqtt client.")?;
+  let mut mqtt =
+    AsyncClient::new(CreateOptions::new()).wrap_err("Failed to create mqtt client.")?;
   let connect_options = args
     .mqtt
     .into_connect_options()
@@ -41,6 +47,17 @@ async fn main() -> Result<(), Report> {
     .connect(connect_options)
     .await
     .wrap_err("Failed to connect to mqtt.")?;
+
+  let (sender, receiver) = unbounded_channel();
+  mqtt.set_message_callback(move |_, msg| {
+    if let Some(msg) = msg {
+      let _ = sender.send(msg);
+    }
+  });
+  mqtt
+    .subscribe("homeassistant/light/enet-1/+/set", 2)
+    .await
+    .wrap_err("Failed to subscribe to topic.")?;
 
   let mut subscriptions = Vec::new();
   for device in client.devices() {
@@ -80,34 +97,68 @@ async fn main() -> Result<(), Report> {
     mqtt.publish(config_msg).await?;
   }
 
-  let mut stream = EvList::new(subscriptions);
-  while let Some((device, value)) = stream.next().await {
-    info!("{} updated to {}", device.name(), value);
+  let device_events = EvList::new(subscriptions).map(ApplicationMessage::from);
+  let mqtt_events = channel_to_stream(receiver).map(ApplicationMessage::from);
+  let events = select(device_events, mqtt_events);
+  pin_mut!(events);
 
-    let state_msg = match device.kind() {
-      DeviceKind::Binary => {
-        let topic = format!("homeassistant/light/enet-1/{}/state", device.number());
-        let config = json!({
-          "state": if value.is_on() { "ON" } else { "OFF" }
-        });
+  while let Some(evt) = events.next().await {
+    match evt {
+      ApplicationMessage::DeviceUpdate(device, value) => {
+        info!("{} updated to {}", device.name(), value);
 
-        let bytes = serde_json::to_vec(&config).unwrap();
-        Message::new_retained(topic, bytes, 2)
+        let state_msg = match device.kind() {
+          DeviceKind::Binary => {
+            let topic = format!("homeassistant/light/enet-1/{}/state", device.number());
+            let config = json!({
+              "state": if value.is_on() { "ON" } else { "OFF" }
+            });
+
+            let bytes = serde_json::to_vec(&config).unwrap();
+            Message::new_retained(topic, bytes, 2)
+          }
+          DeviceKind::Dimmer => {
+            let topic = format!("homeassistant/light/enet-1/{}/state", device.number());
+            let config = json!({
+              "state": if value.is_on() { "ON" } else { "OFF" },
+              "brightness": to_full_byte(value.value())
+            });
+
+            let bytes = serde_json::to_vec(&config).unwrap();
+            Message::new_retained(topic, bytes, 2)
+          }
+          DeviceKind::Blinds => continue,
+        };
+
+        mqtt.publish(state_msg).await?;
       }
-      DeviceKind::Dimmer => {
-        let topic = format!("homeassistant/light/enet-1/{}/state", device.number());
-        let config = json!({
-          "state": if value.is_on() { "ON" } else { "OFF" },
-          "brightness": to_full_byte(value.value())
-        });
 
-        let bytes = serde_json::to_vec(&config).unwrap();
-        Message::new_retained(topic, bytes, 2)
+      ApplicationMessage::MqttMessage(msg) => {
+        info!(msg.topic = msg.topic(), "MQTT message received.");
+
+        if let Some(msg) = MqttMessage::try_match(msg) {
+          match msg {
+            MqttMessage::SetDeviceState(number, value) => {
+              info!("Set device state command received.");
+              match client.device(number) {
+                Some(_) => (),
+                None => {
+                  warn!("Got set-value command for unknown device number {}", number);
+                  continue;
+                }
+              };
+
+              match client.set_value(number, value.into()).await {
+                Ok(_) => (),
+                Err(e) => {
+                  warn!("Failed to set value: {:?}", e);
+                }
+              }
+            }
+          }
+        }
       }
-      DeviceKind::Blinds => continue,
-    };
-
-    mqtt.publish(state_msg).await?;
+    }
   }
 
   Ok(())
@@ -147,6 +198,33 @@ fn to_full_byte(value: Option<OnValue>) -> u8 {
       let v = v.get() as u32;
       let full_v = (v * (u8::MAX as u32)) / 100;
       full_v as u8
+    }
+  }
+}
+
+enum ApplicationMessage {
+  DeviceUpdate(Device, DeviceValue),
+  MqttMessage(Message),
+}
+
+impl From<(Device, DeviceValue)> for ApplicationMessage {
+  #[inline]
+  fn from((device, value): (Device, DeviceValue)) -> Self {
+    Self::DeviceUpdate(device, value)
+  }
+}
+
+impl From<Message> for ApplicationMessage {
+  #[inline]
+  fn from(message: Message) -> Self {
+    Self::MqttMessage(message)
+  }
+}
+
+fn channel_to_stream<T>(mut rx: UnboundedReceiver<T>) -> impl Stream<Item = T> {
+  stream! {
+    while let Some(item) = rx.recv().await {
+      yield item;
     }
   }
 }
