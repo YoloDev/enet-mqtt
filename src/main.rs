@@ -72,7 +72,9 @@ async fn main() -> Result<(), Report> {
           "cmd_t": format!("homeassistant/light/enet-1/{}/set", device.number()),
           "stat_t": format!("homeassistant/light/enet-1/{}/state", device.number()),
           "schema": "json",
-          "brightness": false
+          "brightness": false,
+          "channel": device.number(),
+          "kind": "binary",
         });
 
         let bytes = serde_json::to_vec(&config).unwrap();
@@ -85,7 +87,9 @@ async fn main() -> Result<(), Report> {
           "cmd_t": format!("homeassistant/light/enet-1/{}/set", device.number()),
           "stat_t": format!("homeassistant/light/enet-1/{}/state", device.number()),
           "schema": "json",
-          "brightness": true
+          "brightness": true,
+          "channel": device.number(),
+          "kind": "dimmer",
         });
 
         let bytes = serde_json::to_vec(&config).unwrap();
