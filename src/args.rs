@@ -1,10 +1,10 @@
-use clap::{AppSettings, ArgSettings, Clap};
+use clap::{AppSettings, ArgEnum, ArgSettings, Clap};
 use color_eyre::{eyre::Context, Result};
 use paho_mqtt::{ConnectOptions, ConnectOptionsBuilder};
 use tokio::net::lookup_host;
 use tracing::{event, Level};
 
-#[derive(Clap, Debug, PartialEq, Clone, Copy)]
+#[derive(ArgEnum, Debug, PartialEq, Clone, Copy)]
 pub enum LogFormat {
   Pretty,
   Json,
