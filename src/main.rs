@@ -2,13 +2,18 @@ mod args;
 mod evlist;
 mod mqtt_messages;
 
+use std::{
+  collections::HashMap,
+  time::{Duration, SystemTime},
+};
+
 use args::{Args, LogFormat};
 use async_stream::stream;
 use clap::Clap;
 use color_eyre::{eyre::Context, Report};
 use enet_client::{
   dev::{Device, DeviceKind, DeviceValue, OnValue},
-  EnetClient,
+  EnetClient, SetValue,
 };
 use evlist::EvList;
 use futures::{pin_mut, stream::select, Stream, StreamExt};
@@ -117,7 +122,7 @@ async fn main() -> Result<(), Report> {
           "bri_stat_t": "~/bri",
           "bri_cmd_t": "~/bri/set",
           "bri_scl": "100",
-          "on_cmd_type": "brightness",
+          // "on_cmd_type": "brightness",
           // "optimistic": true,
           "pl_on": "ON",
           "pl_off": "OFF",
@@ -154,6 +159,8 @@ async fn main() -> Result<(), Report> {
   let mqtt_events = channel_to_stream(receiver).map(ApplicationMessage::from);
   let events = select(device_events, mqtt_events);
   pin_mut!(events);
+
+  let mut bris: HashMap<u32, (SetValue, SystemTime)> = HashMap::new();
 
   mqtt.publish(online_msg).await?;
   while let Some(evt) = events.next().await {
@@ -194,7 +201,20 @@ async fn main() -> Result<(), Report> {
                 continue;
               };
 
-              if let Err(e) = client.set_value(number, value.into_device_value()).await {
+              let value = if let Some((bri_value, then)) = bris.remove(&number) {
+                // if more than 15 seconds has passed since we got the "set brightnes" command,
+                // we ignore it.
+                let elapsed = then.elapsed().unwrap();
+                if elapsed > Duration::from_secs(15) {
+                  value.into_device_value()
+                } else {
+                  bri_value
+                }
+              } else {
+                value.into_device_value()
+              };
+
+              if let Err(e) = client.set_value(number, value).await {
                 warn!("Failed to set value: {:?}", e);
               }
             }
@@ -210,9 +230,10 @@ async fn main() -> Result<(), Report> {
                 continue;
               };
 
-              if let Err(e) = client.set_value(number, value.into_device_value()).await {
-                warn!("Failed to set value: {:?}", e);
-              }
+              bris.insert(number, (value.into_device_value(), SystemTime::now()));
+              // if let Err(e) = client.set_value(number, value.into_device_value()).await {
+              //   warn!("Failed to set value: {:?}", e);
+              // }
             }
           }
         }

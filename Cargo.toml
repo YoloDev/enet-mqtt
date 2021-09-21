@@ -9,7 +9,7 @@ edition = "2018"
 async-stream = "0.3.2"
 clap = "3.0.0-beta.4"
 color-eyre = "0.5.11"
-enet-client = "0.1.6"
+enet-client = { version = "0.1.6", path = "../enet-rs/crates/client" }
 eventuals = "0.6.4"
 futures = "0.3.17"
 lazy_static = "1.4.0"
