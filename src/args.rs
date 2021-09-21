@@ -1,6 +1,6 @@
 use clap::{AppSettings, ArgEnum, ArgSettings, Clap};
 use color_eyre::{eyre::Context, Result};
-use paho_mqtt::{ConnectOptions, ConnectOptionsBuilder};
+use paho_mqtt::{ConnectOptions, ConnectOptionsBuilder, Message};
 use tokio::net::lookup_host;
 use tracing::{event, Level};
 
@@ -53,7 +53,7 @@ pub struct Mqtt {
 }
 
 impl Mqtt {
-  pub async fn into_connect_options(self) -> Result<ConnectOptions> {
+  pub async fn into_connect_options(self, last_will: Option<Message>) -> Result<ConnectOptions> {
     let Self { host, port, auth } = self;
     let hosts = lookup_host((&*host, port))
       .await
@@ -74,6 +74,10 @@ impl Mqtt {
 
     if let Some(password) = auth.password {
       builder.password(password);
+    }
+
+    if let Some(will) = last_will {
+      builder.will_message(will);
     }
 
     event!(

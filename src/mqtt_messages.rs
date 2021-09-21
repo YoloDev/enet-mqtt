@@ -1,8 +1,8 @@
+use enet_client::{ClickDuration, SetValue};
 use lazy_static::lazy_static;
 use matchit::Node;
 use paho_mqtt::Message;
-use serde::Deserialize;
-use std::num::NonZeroU8;
+use std::str::FromStr;
 use tracing::{event, Level};
 
 lazy_static! {
@@ -10,8 +10,14 @@ lazy_static! {
     let mut node = Node::new();
     node
       .insert(
-        "homeassistant/light/enet-1/:number/set",
+        "enet/instance-1/:number/set",
         MqttMessageKind::SetDeviceState,
+      )
+      .unwrap();
+    node
+      .insert(
+        "enet/instance-1/:number/bri/set",
+        MqttMessageKind::SetDeviceBrightness,
       )
       .unwrap();
     node
@@ -20,6 +26,7 @@ lazy_static! {
 
 pub enum MqttMessage {
   SetDeviceState(u32, HassDeviceState),
+  SetDeviceBrightness(u32, u8),
 }
 
 impl MqttMessage {
@@ -38,6 +45,39 @@ impl MqttMessage {
     };
 
     match result.value {
+      MqttMessageKind::SetDeviceBrightness => {
+        let num: u32 = match result.params.get("number").unwrap().parse() {
+          Ok(num) => num,
+          Err(e) => {
+            event!(
+              Level::WARN,
+              message.topic = message.topic(),
+              "Received MQTT message where topic did not parse correctly: {:?}",
+              e,
+            );
+
+            return None;
+          }
+        };
+
+        let body = match message.payload_str().parse() {
+          Ok(v) => v,
+          Err(e) => {
+            event!(
+              Level::WARN,
+              message.topic = message.topic(),
+              "Failed to parse MQTT message body: {:?}\nbody:\n{}",
+              e,
+              message.payload_str(),
+            );
+
+            return None;
+          }
+        };
+
+        Some(Self::SetDeviceBrightness(num, body))
+      }
+
       MqttMessageKind::SetDeviceState => {
         let num: u32 = match result.params.get("number").unwrap().parse() {
           Ok(num) => num,
@@ -53,14 +93,15 @@ impl MqttMessage {
           }
         };
 
-        let body: HassDeviceState = match serde_json::from_slice(message.payload()) {
-          Ok(body) => body,
+        let body = match message.payload_str().parse() {
+          Ok(v) => v,
           Err(e) => {
             event!(
               Level::WARN,
               message.topic = message.topic(),
-              "Failed to parse MQTT message body: {:?}",
+              "Failed to parse MQTT message body: {:?}\nbody:\n{}",
               e,
+              message.payload_str(),
             );
 
             return None;
@@ -76,92 +117,48 @@ impl MqttMessage {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MqttMessageKind {
   SetDeviceState,
+  SetDeviceBrightness,
 }
 
-#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq)]
-#[serde(tag = "state", rename_all = "UPPERCASE")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HassDeviceState {
-  On(HassOnState),
+  On,
   Off,
 }
 
-#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq)]
-pub struct HassOnState {
-  #[serde(default)]
-  brightness: Option<NonZeroU8>,
-}
+impl FromStr for HassDeviceState {
+  type Err = String;
 
-impl From<HassDeviceState> for enet_client::SetValue {
-  fn from(state: HassDeviceState) -> Self {
-    match state {
-      HassDeviceState::On(HassOnState { brightness: None }) => {
-        Self::On(enet_client::ClickDuration::Short)
-      }
-      HassDeviceState::On(HassOnState {
-        brightness: Some(v),
-      }) => Self::Dimm(from_full_byte(v.get())),
-      HassDeviceState::Off => Self::Off(enet_client::ClickDuration::Short),
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s {
+      "ON" => Ok(HassDeviceState::On),
+      "OFF" => Ok(HassDeviceState::Off),
+      _ => Err(format!(
+        "'{}' is not a valid state string (expected ON or OFF)",
+        s
+      )),
     }
   }
 }
 
-fn from_full_byte(value: u8) -> u8 {
-  let v = value as u32;
-  let p = v * 100u32 / 255u32;
-  p as u8
+pub(crate) trait IntoDeviceValue {
+  fn into_device_value(self) -> SetValue;
 }
 
-#[cfg(test)]
-mod tests {
-  use super::*;
-  use serde_test::{assert_de_tokens, Token};
-
-  #[test]
-  fn from_full_byte_test() {
-    assert_eq!(0, from_full_byte(0), "0");
-    assert_eq!(100, from_full_byte(255), "255");
+impl IntoDeviceValue for HassDeviceState {
+  fn into_device_value(self) -> SetValue {
+    match self {
+      HassDeviceState::On => SetValue::On(ClickDuration::Short),
+      HassDeviceState::Off => SetValue::Off(ClickDuration::Short),
+    }
   }
+}
 
-  #[test]
-  fn deserialize_off_state() {
-    assert_de_tokens(
-      &HassDeviceState::Off,
-      &[
-        Token::Map { len: Some(1) },
-        Token::Str("state"),
-        Token::Str("OFF"),
-        Token::MapEnd,
-      ],
-    )
-  }
-
-  #[test]
-  fn deserialize_on_without_brightness() {
-    assert_de_tokens(
-      &HassDeviceState::On(HassOnState { brightness: None }),
-      &[
-        Token::Map { len: Some(1) },
-        Token::Str("state"),
-        Token::Str("ON"),
-        Token::MapEnd,
-      ],
-    )
-  }
-
-  #[test]
-  fn deserialize_on_with_brightness() {
-    assert_de_tokens(
-      &HassDeviceState::On(HassOnState {
-        brightness: NonZeroU8::new(100u8),
-      }),
-      &[
-        Token::Map { len: Some(2) },
-        Token::Str("state"),
-        Token::Str("ON"),
-        Token::Str("brightness"),
-        Token::U8(100),
-        Token::MapEnd,
-      ],
-    )
+impl IntoDeviceValue for u8 {
+  fn into_device_value(self) -> SetValue {
+    match self {
+      0 => SetValue::Off(ClickDuration::Short),
+      v => SetValue::Dimm(v),
+    }
   }
 }
