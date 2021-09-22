@@ -233,9 +233,9 @@ dependencies = [
 
 [[package]]
 name = "enet-client"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb31526fc44512335a708a2dc2b96adc160baee78dc38bcf8dc315b2800526b8"
+checksum = "0a8dd84f16af5bee545dbaae95d740024a7c30984e976e0690c2ef7984734a97"
 dependencies = [
  "backoff",
  "bytes",

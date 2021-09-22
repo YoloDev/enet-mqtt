@@ -4,6 +4,7 @@ mod mqtt_messages;
 
 use std::{
   collections::HashMap,
+  future::{ready, Ready},
   time::{Duration, SystemTime},
 };
 
@@ -12,9 +13,10 @@ use async_stream::stream;
 use clap::Clap;
 use color_eyre::{eyre::Context, Report};
 use enet_client::{
-  dev::{Device, DeviceKind, DeviceValue, OnValue},
-  EnetClient, SetValue,
+  dev::{Device, DeviceBrightness, DeviceState},
+  EnetClient, EnetDevice, SetValue,
 };
+use eventuals::EventualExt;
 use evlist::EvList;
 use futures::{pin_mut, stream::select, Stream, StreamExt};
 use paho_mqtt::{AsyncClient, CreateOptions, Message};
@@ -27,6 +29,10 @@ use crate::mqtt_messages::{IntoDeviceValue, MqttMessage};
 
 #[tokio::main]
 async fn main() -> Result<(), Report> {
+  _main().await
+}
+
+async fn _main() -> Result<(), Report> {
   let args = Args::parse();
   setup(args.log_format)?;
 
@@ -73,33 +79,39 @@ async fn main() -> Result<(), Report> {
   let mut subscriptions = Vec::new();
   for device in client.devices() {
     info!(device.name = %device.name(), device.number = device.number(), "found device");
-    subscriptions.push((device.clone(), device.subscribe()));
 
-    let (config_msg, attr_msg) = match device.kind() {
-      DeviceKind::Binary => {
-        let topic = format!("homeassistant/light/enet-1/{}/config", device.number());
+    let (config_msg, attr_msg) = match device {
+      Device::Binary(binary) => {
+        subscriptions.push((
+          device.clone(),
+          binary
+            .subscribe_state()
+            .map(DeviceUpdate::state)
+            .subscribe(),
+        ));
+
+        let topic = format!("homeassistant/light/enet-1/{}/config", binary.number());
         let config = json!({
-          "~": format!("enet/instance-1/{}", device.number()),
-          "uniq_id": format!("enet-1-{}", device.number()),
-          "name": device.name(),
+          "~": format!("enet/instance-1/{}", binary.number()),
+          "uniq_id": format!("enet-1-{}", binary.number()),
+          "name": binary.name(),
           "cmd_t": "~/set",
           "stat_t": "~/state",
           "json_attr_t": "~/attr",
-          // "optimistic": true,
           "pl_on": "ON",
           "pl_off": "OFF",
           "pl_avail": "online",
           "pl_not_avail": "offline",
           "qos": 1,
           "device": {
-            "ids": format!("enet-1-{}", device.number()),
-            "name": device.name(),
+            "ids": format!("enet-1-{}", binary.number()),
+            "name": binary.name(),
           },
           "avty_t": "enet/instance-1/status",
         });
 
         let attr = json!({
-          "channel": device.number(),
+          "channel": binary.number(),
           "kind": "binary",
           "enet_gateway": args.gateway,
           "assumed_state": false,
@@ -107,37 +119,51 @@ async fn main() -> Result<(), Report> {
 
         (
           msg_retained(topic, &config),
-          msg_retained(format!("enet/instance-1/{}/attr", device.number()), &attr),
+          msg_retained(format!("enet/instance-1/{}/attr", binary.number()), &attr),
         )
       }
-      DeviceKind::Dimmer => {
-        let topic = format!("homeassistant/light/enet-1/{}/config", device.number());
+
+      Device::Dimmer(dimmer) => {
+        subscriptions.push((
+          device.clone(),
+          dimmer
+            .subscribe_state()
+            .map(DeviceUpdate::state)
+            .subscribe(),
+        ));
+        subscriptions.push((
+          device.clone(),
+          dimmer
+            .subscribe_brightness()
+            .map(DeviceUpdate::brightness)
+            .subscribe(),
+        ));
+
+        let topic = format!("homeassistant/light/enet-1/{}/config", dimmer.number());
         let config = json!({
-          "~": format!("enet/instance-1/{}", device.number()),
-          "uniq_id": format!("enet-1-{}", device.number()),
-          "name": device.name(),
+          "~": format!("enet/instance-1/{}", dimmer.number()),
+          "uniq_id": format!("enet-1-{}", dimmer.number()),
+          "name": dimmer.name(),
           "cmd_t": "~/set",
           "stat_t": "~/state",
           "json_attr_t": "~/attr",
           "bri_stat_t": "~/bri",
           "bri_cmd_t": "~/bri/set",
           "bri_scl": "100",
-          // "on_cmd_type": "brightness",
-          // "optimistic": true,
           "pl_on": "ON",
           "pl_off": "OFF",
           "pl_avail": "online",
           "pl_not_avail": "offline",
           "qos": 1,
           "device": {
-            "ids": format!("enet-1-{}", device.number()),
-            "name": device.name(),
+            "ids": format!("enet-1-{}", dimmer.number()),
+            "name": dimmer.name(),
           },
           "avty_t": "enet/instance-1/status",
         });
 
         let attr = json!({
-          "channel": device.number(),
+          "channel": dimmer.number(),
           "kind": "dimmer",
           "enet_gateway": args.gateway,
           "assumed_state": false,
@@ -145,10 +171,9 @@ async fn main() -> Result<(), Report> {
 
         (
           msg_retained(topic, &config),
-          msg_retained(format!("enet/instance-1/{}/attr", device.number()), &attr),
+          msg_retained(format!("enet/instance-1/{}/attr", dimmer.number()), &attr),
         )
       }
-      DeviceKind::Blinds => continue,
     };
 
     mqtt.publish(attr_msg).await?;
@@ -165,28 +190,41 @@ async fn main() -> Result<(), Report> {
   mqtt.publish(online_msg).await?;
   while let Some(evt) = events.next().await {
     match evt {
-      ApplicationMessage::DeviceUpdate(device, value) => {
-        info!("{} updated to {}", device.name(), value);
+      ApplicationMessage::DeviceUpdate(device, update) => {
+        info!("{} updated with {:?}", device.name(), update);
 
-        let state_msg = match device.kind() {
-          DeviceKind::Binary => {
-            let topic = format!("enet/instance-1/{}/state", device.number());
-            Message::new_retained(topic, if value.is_on() { "ON" } else { "OFF" }, 2)
-          }
-          DeviceKind::Dimmer => {
-            let topic = format!("enet/instance-1/{}/bri", device.number());
-            let value_s = get_brightness(value.value()).to_string();
-            mqtt
-              .publish(Message::new_retained(topic, value_s, 2))
-              .await?;
+        match device {
+          Device::Binary(device) => match update {
+            DeviceUpdate::State(state) => {
+              let topic = format!("enet/instance-1/{}/state", device.number());
+              let payload = match state {
+                DeviceState::On => "ON",
+                DeviceState::Off => "OFF",
+              };
+              let state_msg = Message::new_retained(topic, payload, 2);
+              mqtt.publish(state_msg).await?;
+            }
+            DeviceUpdate::Brightness(_) => unreachable!(),
+          },
 
-            let topic = format!("enet/instance-1/{}/state", device.number());
-            Message::new_retained(topic, if value.is_on() { "ON" } else { "OFF" }, 2)
-          }
-          DeviceKind::Blinds => continue,
-        };
-
-        mqtt.publish(state_msg).await?;
+          Device::Dimmer(device) => match update {
+            DeviceUpdate::State(state) => {
+              let topic = format!("enet/instance-1/{}/state", device.number());
+              let payload = match state {
+                DeviceState::On => "ON",
+                DeviceState::Off => "OFF",
+              };
+              let state_msg = Message::new_retained(topic, payload, 2);
+              mqtt.publish(state_msg).await?;
+            }
+            DeviceUpdate::Brightness(brightness) => {
+              let topic = format!("enet/instance-1/{}/bri", device.number());
+              let value_s = brightness.get().to_string();
+              let brightness_msg = Message::new_retained(topic, value_s, 2);
+              mqtt.publish(brightness_msg).await?;
+            }
+          },
+        }
       }
 
       ApplicationMessage::MqttMessage(msg) => {
@@ -231,9 +269,6 @@ async fn main() -> Result<(), Report> {
               };
 
               bris.insert(number, (value.into_device_value(), SystemTime::now()));
-              // if let Err(e) = client.set_value(number, value.into_device_value()).await {
-              //   warn!("Failed to set value: {:?}", e);
-              // }
             }
           }
         }
@@ -271,21 +306,30 @@ fn setup(format: LogFormat) -> Result<(), Report> {
   Ok(())
 }
 
-fn get_brightness(value: Option<OnValue>) -> u8 {
-  match value {
-    None => 0,
-    Some(v) => v.get(),
-  }
-}
-
 enum ApplicationMessage {
-  DeviceUpdate(Device, DeviceValue),
+  DeviceUpdate(Device, DeviceUpdate),
   MqttMessage(Message),
 }
 
-impl From<(Device, DeviceValue)> for ApplicationMessage {
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+enum DeviceUpdate {
+  State(DeviceState),
+  Brightness(DeviceBrightness),
+}
+
+impl DeviceUpdate {
+  fn state(state: DeviceState) -> Ready<Self> {
+    ready(Self::State(state))
+  }
+
+  fn brightness(brightness: DeviceBrightness) -> Ready<Self> {
+    ready(Self::Brightness(brightness))
+  }
+}
+
+impl From<(Device, DeviceUpdate)> for ApplicationMessage {
   #[inline]
-  fn from((device, value): (Device, DeviceValue)) -> Self {
+  fn from((device, value): (Device, DeviceUpdate)) -> Self {
     Self::DeviceUpdate(device, value)
   }
 }
