@@ -303,9 +303,9 @@ dependencies = [
 
 [[package]]
 name = "eventuals"
-version = "0.6.4"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03e49659925053464244c8e36d7e3cdaf7a5a309d8c38ecc20f5f30970431c0e"
+checksum = "a2a24bc5e558b5c19db9777dafb665e35f8fe2faa70f1fbfafd6ccb3b908a8ff"
 dependencies = [
  "by_address",
  "futures",
