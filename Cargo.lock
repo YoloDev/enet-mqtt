@@ -141,7 +141,6 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits",
- "time",
  "winapi",
 ]
 
@@ -233,9 +232,9 @@ dependencies = [
 
 [[package]]
 name = "enet-client"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a8dd84f16af5bee545dbaae95d740024a7c30984e976e0690c2ef7984734a97"
+checksum = "2b9fec1fd60276ddfc0245ad9eb10f8cc92c1204979753e49fa5e2eea70c262e"
 dependencies = [
  "backoff",
  "bytes",
@@ -272,9 +271,9 @@ dependencies = [
 
 [[package]]
 name = "enet-proto"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5caff1536ad0b3b7624ac363937ff7c3ed43cd38249b6dfd610121b806465c4f"
+checksum = "660e4d7591db4252aca3f472520320eb94be8dbe67ebf8479454540a0f13cccc"
 dependencies = [
  "bytes",
  "color-eyre",
@@ -965,9 +964,9 @@ dependencies = [
 
 [[package]]
 name = "serde-aux"
-version = "2.3.0"
+version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "907c320ef8f45ce134b28ca9567ec58ec0d51dcae4e1ffe7ee0cc15517243810"
+checksum = "93abf9799c576f004252b2a05168d58527fb7c54de12e94b4d12fe3475ffad24"
 dependencies = [
  "chrono",
  "serde",
@@ -1103,16 +1102,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8018d24e04c95ac8790716a5987d0fec4f8b27249ffa0f7d33f1369bdfb88cbd"
 dependencies = [
  "once_cell",
-]
-
-[[package]]
-name = "time"
-version = "0.1.43"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
-dependencies = [
- "libc",
- "winapi",
 ]
 
 [[package]]
