@@ -9,7 +9,7 @@ edition = "2018"
 async-stream = "0.3.2"
 clap = "3.0.0-beta.4"
 color-eyre = "0.5.11"
-enet-client = "0.2.0"
+enet-client = "0.2.1"
 eventuals = "0.6.6"
 futures = "0.3.17"
 lazy_static = "1.4.0"
@@ -20,8 +20,6 @@ serde_json = "1.0.68"
 tokio = { version = "1.12.0", features = ["full"] }
 tracing = "0.1.29"
 tracing-subscriber = "0.2.25"
-
-# enet-client = { version = "0.2.0", path = "../enet-rs/crates/client" }
 
 [dev-dependencies]
 serde_test = "1.0.130"
