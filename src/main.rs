@@ -199,7 +199,7 @@ async fn _main() -> Result<(), Report> {
               let topic = format!("enet/instance-1/{}/state", device.number());
               let payload = match state {
                 DeviceState::On => "ON",
-                DeviceState::Off => "OFF",
+                DeviceState::Off | DeviceState::Unknown => "OFF",
               };
               let state_msg = Message::new_retained(topic, payload, 2);
               mqtt.publish(state_msg).await?;
@@ -212,7 +212,7 @@ async fn _main() -> Result<(), Report> {
               let topic = format!("enet/instance-1/{}/state", device.number());
               let payload = match state {
                 DeviceState::On => "ON",
-                DeviceState::Off => "OFF",
+                DeviceState::Off | DeviceState::Unknown => "OFF",
               };
               let state_msg = Message::new_retained(topic, payload, 2);
               mqtt.publish(state_msg).await?;
