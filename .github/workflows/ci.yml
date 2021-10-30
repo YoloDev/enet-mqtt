@@ -33,8 +33,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v1
 
-      - uses:
-
       - name: Clippy
         run: cargo clippy -- -D warnings
 
