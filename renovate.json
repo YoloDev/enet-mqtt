@@ -1,7 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["local>YoloDev/renovate-config"],
-  "rangeStrategy": "pin",
-  "automerge": true,
-  "automergeStrategy": "squash"
+  "rangeStrategy": "pin"
 }
