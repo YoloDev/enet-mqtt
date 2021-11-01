@@ -1,4 +1,4 @@
-use clap::{AppSettings, ArgEnum, ArgSettings, Clap};
+use clap::{ArgEnum, ArgSettings, ColorChoice, Parser};
 use color_eyre::{eyre::Context, Result};
 use paho_mqtt::{ConnectOptions, ConnectOptionsBuilder, Message};
 use tokio::net::lookup_host;
@@ -10,8 +10,8 @@ pub enum LogFormat {
   Json,
 }
 
-#[derive(Debug, Clap)]
-#[clap(setting = AppSettings::ColoredHelp)]
+#[derive(Debug, Parser)]
+#[clap(color = ColorChoice::Always)]
 pub struct Args {
   /// Log output format.
   #[clap(
@@ -32,7 +32,7 @@ pub struct Args {
   pub mqtt: Mqtt,
 }
 
-#[derive(Debug, Clap)]
+#[derive(Debug, Parser)]
 pub struct Mqtt {
   /// MQTT broker address (example: mosquitto.org).
   #[clap(long = "mqtt-host", short = 'h', env = "ENET_MQTT_HOST")]
@@ -91,7 +91,7 @@ impl Mqtt {
   }
 }
 
-#[derive(Debug, Clap)]
+#[derive(Debug, Parser)]
 pub struct MqttAuth {
   /// MQTT username.
   #[clap(long = "mqtt-user", short = 'u', env = "ENET_MQTT_USER")]

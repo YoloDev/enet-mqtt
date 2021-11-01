@@ -10,7 +10,7 @@ use std::{
 
 use args::{Args, LogFormat};
 use async_stream::stream;
-use clap::Clap;
+use clap::Parser;
 use color_eyre::{eyre::Context, Report};
 use enet_client::{
   dev::{Device, DeviceBrightness, DeviceState},
