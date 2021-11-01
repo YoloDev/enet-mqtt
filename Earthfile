@@ -178,89 +178,112 @@ build-amd64-linux-musl-static:
 
     SAVE ARTIFACT /src/out/${package}
 
+
+###########################################################################
+# VERSION HELPER
+###########################################################################
+
+version:
+  FROM rust
+
+  WORKDIR /src
+  COPY --dir .cargo src Cargo.lock Cargo.toml rust-toolchain.toml /src
+  RUN mkdir -p "/out" && cargo pkgid | cut -d# -f2 | cut -d: -f2 > /out/.version
+
+  WORKDIR /out
+  RUN echo "version=$(cat .version)"
+
 ###########################################################################
 # ARTIFACT TARGETS
 ###########################################################################
 
 aarch64-linux-gnu:
-  FROM busybox
+  FROM +version
   ENV platform=aarch64-linux-gnu
 
   COPY +build-aarch64-linux-gnu/${package} /out/
-  RUN sha256sum /out/${package} > /out/${package}.sha256.txt
+  RUN mv ${package} "${package}-v$(cat .version)-${platform}"
+  RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
+  RUN rm .version
 
-  SAVE ARTIFACT /out/${package} AS LOCAL build/${package}-${platform}
-  SAVE ARTIFACT /out/${package}.sha256.txt AS LOCAL build/${package}-${platform}.sha256.txt
+  SAVE ARTIFACT /out/* AS LOCAL build/
 
 aarch64-linux-gnu-vendored:
-  FROM busybox
+  FROM +version
   ENV platform=aarch64-linux-gnu-vendored
 
   COPY +build-aarch64-linux-gnu-vendored/${package} /out/
-  RUN sha256sum /out/${package} > /out/${package}.sha256.txt
+  RUN mv ${package} "${package}-v$(cat .version)-${platform}"
+  RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
+  RUN rm .version
 
-  SAVE ARTIFACT /out/${package} AS LOCAL build/${package}-${platform}
-  SAVE ARTIFACT /out/${package}.sha256.txt AS LOCAL build/${package}-${platform}.sha256.txt
+  SAVE ARTIFACT /out/* AS LOCAL build/
 
 aarch64-linux-musl-static:
-  FROM busybox
+  FROM +version
   ENV platform=aarch64-linux-musl-static
 
   COPY +build-aarch64-linux-musl-static/${package} /out/
-  RUN sha256sum /out/${package} > /out/${package}.sha256.txt
+  RUN mv ${package} "${package}-v$(cat .version)-${platform}"
+  RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
+  RUN rm .version
 
-  SAVE ARTIFACT /out/${package} AS LOCAL build/${package}-${platform}
-  SAVE ARTIFACT /out/${package}.sha256.txt AS LOCAL build/${package}-${platform}.sha256.txt
+  SAVE ARTIFACT /out/* AS LOCAL build/
 
 i686-linux-gnu:
-  FROM busybox
+  FROM +version
   ENV platform=i686-linux-gnu
 
   COPY +build-i686-linux-gnu/${package} /out/
-  RUN sha256sum /out/${package} > /out/${package}.sha256.txt
+  RUN mv ${package} "${package}-v$(cat .version)-${platform}"
+  RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
+  RUN rm .version
 
-  SAVE ARTIFACT /out/${package} AS LOCAL build/${package}-${platform}
-  SAVE ARTIFACT /out/${package}.sha256.txt AS LOCAL build/${package}-${platform}.sha256.txt
+  SAVE ARTIFACT /out/* AS LOCAL build/
 
 i686-linux-gnu-vendored:
-  FROM busybox
+  FROM +version
   ENV platform=i686-linux-gnu-vendored
 
   COPY +build-i686-linux-gnu-vendored/${package} /out/
-  RUN sha256sum /out/${package} > /out/${package}.sha256.txt
+  RUN mv ${package} "${package}-v$(cat .version)-${platform}"
+  RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
+  RUN rm .version
 
-  SAVE ARTIFACT /out/${package} AS LOCAL build/${package}-${platform}
-  SAVE ARTIFACT /out/${package}.sha256.txt AS LOCAL build/${package}-${platform}.sha256.txt
+  SAVE ARTIFACT /out/* AS LOCAL build/
 
 amd64-linux-gnu:
-  FROM busybox
+  FROM +version
   ENV platform=amd64-linux-gnu
 
   COPY +build-amd64-linux-gnu/${package} /out/
-  RUN sha256sum /out/${package} > /out/${package}.sha256.txt
+  RUN mv ${package} "${package}-v$(cat .version)-${platform}"
+  RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
+  RUN rm .version
 
-  SAVE ARTIFACT /out/${package} AS LOCAL build/${package}-${platform}
-  SAVE ARTIFACT /out/${package}.sha256.txt AS LOCAL build/${package}-${platform}.sha256.txt
+  SAVE ARTIFACT /out/* AS LOCAL build/
 
 amd64-linux-gnu-vendored:
-  FROM busybox
+  FROM +version
   ENV platform=amd64-linux-gnu-vendored
 
   COPY +build-amd64-linux-gnu-vendored/${package} /out/
-  RUN sha256sum /out/${package} > /out/${package}.sha256.txt
+  RUN mv ${package} "${package}-v$(cat .version)-${platform}"
+  RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
+  RUN rm .version
 
-  SAVE ARTIFACT /out/${package} AS LOCAL build/${package}-${platform}
-  SAVE ARTIFACT /out/${package}.sha256.txt AS LOCAL build/${package}-${platform}.sha256.txt
+  SAVE ARTIFACT /out/* AS LOCAL build/
 
 amd64-linux-musl-static:
-  FROM busybox
+  FROM +version
   ENV platform=amd64-linux-musl-static
 
   COPY +build-amd64-linux-musl-static/${package} /out/
-  RUN sha256sum /out/${package} > /out/${package}.sha256.txt
+  RUN mv ${package} "${package}-v$(cat .version)-${platform}"
+  RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
+  RUN rm .version
 
-  SAVE ARTIFACT /out/${package} AS LOCAL build/${package}-${platform}
-  SAVE ARTIFACT /out/${package}.sha256.txt AS LOCAL build/${package}-${platform}.sha256.txt
+  SAVE ARTIFACT /out/* AS LOCAL build/
 
 ###########################################################################
 # GROUP TARGETS
