@@ -37,10 +37,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint
-        run: just lint
+        run: cargo clippy --locked -- -D warnings
 
       - name: Run tests
-        run: just test
+        run: cargo test --locked
   # image:
   #   name: Create image
   #   runs-on: ubuntu-latest
