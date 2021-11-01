@@ -45,24 +45,3 @@ jobs:
 
       - name: Run tests
         run: cargo test --locked
-  # image:
-  #   name: Create image
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: ⏬ Checkout
-  #       uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
-
-  #     - name: 🔽 Download latest earthly
-  #       run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.5.20/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
-
-  #     - name: 🔨 Build
-  #       run: earthly +all
-
-  #     - name: 🔼 Upload build as artifact
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: build
-  #         path: build/

@@ -9,6 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: GoogleCloudPlatform/release-please-action@v2
+        id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           command: manifest
+
+      - if: ${{ steps.release.outputs.release_created }}
+        uses: ./upload-binaries.yml
+        with:
+          release: ${{ steps.release.outputs.tag_name }}
