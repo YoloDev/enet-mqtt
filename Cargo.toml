@@ -29,7 +29,8 @@ paho-mqtt = { version = "0.9.1", features = ["vendored-ssl"] }
 serde_test = "1.0.130"
 
 [profile.release]
-lto = true
+lto = "thin"
+debug = 1
 
 [features]
 vendored = ["paho-mqtt/vendored-ssl"]

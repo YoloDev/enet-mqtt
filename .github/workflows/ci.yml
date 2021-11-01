@@ -32,15 +32,13 @@ jobs:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v1
+      - uses: extractions/setup-just@v1
 
-      - name: Clippy
-        run: cargo clippy -- -D warnings
+      - name: Lint
+        run: just lint
 
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all
+        run: just test
   # image:
   #   name: Create image
   #   runs-on: ubuntu-latest
