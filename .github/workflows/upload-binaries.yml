@@ -25,7 +25,7 @@ jobs:
         run: |
           TAG_NAME="${{ inputs.release }}"
           if [[ -z "$TAG_NAME" ]]; then
-            TAG_NAME="${{ github.event.inputs }}"
+            TAG_NAME="${{ github.event.inputs.release }}"
           fi
           echo tag=$TAG_NAME
           echo ::set-output name=tag::$TAG_NAME
