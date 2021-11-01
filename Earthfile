@@ -10,22 +10,28 @@ base-aarch64-unknown-linux-gnu:
   FROM --platform linux/arm64 arm64v8/rust
 
   ENV DEBIAN_FRONTEND=noninteractive
+  ENV RUST_BACKTRACE=1
   ENV target=aarch64-unknown-linux-gnu
   RUN apt-get update && apt-get install -yq libssl-dev git cmake lld
 
   WORKDIR /src
   COPY rust-toolchain.toml /src
   RUN cargo --version
+  WORKDIR /src
+  SAVE IMAGE --cache-hint
 
 base-aarch64-unknown-linux-musl:
   FROM --platform linux/arm64 arm64v8/rust:alpine
 
+  ENV RUST_BACKTRACE=1
   ENV target=aarch64-unknown-linux-musl
   RUN apk add openssl-dev lld musl-dev perl make cmake
 
   WORKDIR /src
   COPY rust-toolchain.toml /src
   RUN cargo --version
+  WORKDIR /src
+  SAVE IMAGE --cache-hint
 
 # amd64
 
@@ -33,151 +39,174 @@ base-amd64-unknown-linux-gnu:
   FROM --platform linux/amd64 amd64/rust
 
   ENV DEBIAN_FRONTEND=noninteractive
+  ENV RUST_BACKTRACE=1
   ENV target=x86_64-unknown-linux-gnu
   RUN apt-get update && apt-get install -yq libssl-dev git cmake lld
 
   WORKDIR /src
   COPY rust-toolchain.toml /src
   RUN cargo --version
+  WORKDIR /src
+  SAVE IMAGE --cache-hint
 
 base-amd64-unknown-linux-musl:
   FROM --platform linux/amd64 amd64/rust:alpine
 
+  ENV RUST_BACKTRACE=1
   ENV target=x86_64-unknown-linux-musl
   RUN apk add openssl-dev lld musl-dev perl make cmake
 
   WORKDIR /src
   COPY rust-toolchain.toml /src
   RUN cargo --version
+  WORKDIR /src
+  SAVE IMAGE --cache-hint
+
+###########################################################################
+# CHEF TARGETS
+###########################################################################
+
+# aarch64
+
+chef-aarch64-unknown-linux-gnu:
+  FROM +base-aarch64-unknown-linux-gnu
+  RUN cargo install cargo-chef --locked
+  SAVE IMAGE --cache-hint
+
+chef-aarch64-unknown-linux-musl:
+  FROM +base-aarch64-unknown-linux-musl
+  RUN cargo install cargo-chef --locked
+  SAVE IMAGE --cache-hint
+
+# amd64
+
+chef-amd64-unknown-linux-gnu:
+  FROM +base-amd64-unknown-linux-gnu
+  RUN cargo install cargo-chef --locked
+  SAVE IMAGE --cache-hint
+
+chef-amd64-unknown-linux-musl:
+  FROM +base-amd64-unknown-linux-musl
+  RUN cargo install cargo-chef --locked
+  SAVE IMAGE --cache-hint
+
+###########################################################################
+# PLAN TARGETS
+###########################################################################
+
+plan-aarch64-unknown-linux-gnu:
+  FROM +chef-aarch64-unknown-linux-gnu
+  COPY --dir .cargo src Cargo.lock Cargo.toml /src
+  RUN cargo chef prepare --recipe-path recipe.json
+  SAVE ARTIFACT recipe.json
+  SAVE IMAGE --cache-hint
+
+plan-aarch64-unknown-linux-musl:
+  FROM +chef-aarch64-unknown-linux-musl
+  COPY --dir .cargo src Cargo.lock Cargo.toml /src
+  RUN cargo chef prepare --recipe-path recipe.json
+  SAVE ARTIFACT recipe.json
+  SAVE IMAGE --cache-hint
+
+# amd64
+
+plan-amd64-unknown-linux-gnu:
+  FROM +chef-amd64-unknown-linux-gnu
+  COPY --dir .cargo src Cargo.lock Cargo.toml /src
+  RUN cargo chef prepare --recipe-path recipe.json
+  SAVE ARTIFACT recipe.json
+  SAVE IMAGE --cache-hint
+
+plan-amd64-unknown-linux-musl:
+  FROM +chef-amd64-unknown-linux-musl
+  COPY --dir .cargo src Cargo.lock Cargo.toml /src
+  RUN cargo chef prepare --recipe-path recipe.json
+  SAVE ARTIFACT recipe.json
+  SAVE IMAGE --cache-hint
+
+###########################################################################
+# DEPS TARGETS
+###########################################################################
+
+deps-aarch64-linux-gnu:
+  FROM +chef-aarch64-unknown-linux-gnu
+  COPY +plan-aarch64-unknown-linux-gnu/recipe.json .
+  RUN cargo chef cook --recipe-path recipe.json --target ${target} --release --package ${package}
+  SAVE IMAGE --cache-hint
+
+deps-aarch64-linux-gnu-vendored:
+  FROM +deps-aarch64-linux-gnu
+  COPY +plan-aarch64-unknown-linux-gnu/recipe.json .
+  RUN cargo chef cook --recipe-path recipe.json --target ${target} --release --package ${package} --features vendored
+  SAVE IMAGE --cache-hint
+
+deps-aarch64-linux-musl-static:
+  FROM +chef-aarch64-unknown-linux-musl
+  COPY +plan-aarch64-unknown-linux-musl/recipe.json .
+  RUN cargo chef cook --recipe-path recipe.json --target ${target} --release --package ${package} --features vendored
+  SAVE IMAGE --cache-hint
+
+# amd64
+
+deps-amd64-linux-gnu:
+  FROM +chef-amd64-unknown-linux-gnu
+  COPY +plan-amd64-unknown-linux-gnu/recipe.json .
+  RUN cargo chef cook --recipe-path recipe.json --target ${target} --release --package ${package}
+  SAVE IMAGE --cache-hint
+
+deps-amd64-linux-gnu-vendored:
+  FROM +deps-amd64-linux-gnu
+  COPY +plan-amd64-unknown-linux-gnu/recipe.json .
+  RUN cargo chef cook --recipe-path recipe.json --target ${target} --release --package ${package} --features vendored
+  SAVE IMAGE --cache-hint
+
+deps-amd64-linux-musl-static:
+  FROM +chef-amd64-unknown-linux-musl
+  COPY +plan-amd64-unknown-linux-musl/recipe.json .
+  RUN cargo chef cook --recipe-path recipe.json --target ${target} --release --package ${package} --features vendored
+  SAVE IMAGE --cache-hint
 
 ###########################################################################
 # BUILD TARGETS
 ###########################################################################
 
-# aarch64
-
 build-aarch64-linux-gnu:
-  FROM +base-aarch64-unknown-linux-gnu
-
-  WORKDIR /src
+  FROM +deps-aarch64-linux-gnu
   COPY --dir .cargo src Cargo.lock Cargo.toml /src
-
-  RUN \
-    --mount=type=cache,target=$HOME/.cargo/bin \
-    --mount=type=cache,target=$HOME/.cargo/.crates2.json \
-    --mount=type=cache,target=$HOME/.cargo/.crates.toml \
-    --mount=type=cache,target=$HOME/.cargo/git \
-    --mount=type=cache,target=$HOME/.cargo/registry/cache \
-    --mount=type=cache,target=$HOME/.cargo/registry/index \
-    --mount=type=cache,target=/src/target \
-    cargo build --target ${target} --release --package ${package} --locked --bin ${package} \
-    && mkdir -p /src/out \
-    && cp /src/target/${target}/release/${package} /src/out/${package}
-
-    SAVE ARTIFACT /src/out/${package}
+  RUN cargo build --target ${target} --release --package ${package} --locked --bin ${package}
+  SAVE ARTIFACT target/${target}/release/${package}
 
 build-aarch64-linux-gnu-vendored:
-  FROM +base-aarch64-unknown-linux-gnu
-
-  WORKDIR /src
+  FROM +deps-aarch64-linux-gnu-vendored
   COPY --dir .cargo src Cargo.lock Cargo.toml /src
-
-  RUN \
-    --mount=type=cache,target=$HOME/.cargo/bin \
-    --mount=type=cache,target=$HOME/.cargo/.crates2.json \
-    --mount=type=cache,target=$HOME/.cargo/.crates.toml \
-    --mount=type=cache,target=$HOME/.cargo/git \
-    --mount=type=cache,target=$HOME/.cargo/registry/cache \
-    --mount=type=cache,target=$HOME/.cargo/registry/index \
-    --mount=type=cache,target=/src/target \
-    cargo build --target ${target} --release --package ${package} --locked --bin ${package}  --features vendored \
-    && mkdir -p /src/out \
-    && cp /src/target/${target}/release/${package} /src/out/${package}
-
-    SAVE ARTIFACT /src/out/${package}
+  RUN cargo build --target ${target} --release --package ${package} --locked --bin ${package} --features vendored
+  SAVE ARTIFACT target/${target}/release/${package}
 
 build-aarch64-linux-musl-static:
-  FROM +base-aarch64-unknown-linux-musl
-
-  WORKDIR /src
+  FROM +deps-aarch64-linux-musl-static
   COPY --dir .cargo src Cargo.lock Cargo.toml /src
-
-  RUN \
-    --mount=type=cache,target=$HOME/.cargo/bin \
-    --mount=type=cache,target=$HOME/.cargo/.crates2.json \
-    --mount=type=cache,target=$HOME/.cargo/.crates.toml \
-    --mount=type=cache,target=$HOME/.cargo/git \
-    --mount=type=cache,target=$HOME/.cargo/registry/cache \
-    --mount=type=cache,target=$HOME/.cargo/registry/index \
-    --mount=type=cache,target=/src/target \
-    cargo build --target ${target} --release --package ${package} --locked --bin ${package} --features vendored \
-    && mkdir -p /src/out \
-    && cp /src/target/${target}/release/${package} /src/out/${package}
-
-    SAVE ARTIFACT /src/out/${package}
+  RUN cargo build --target ${target} --release --package ${package} --locked --bin ${package} --features vendored
+  SAVE ARTIFACT target/${target}/release/${package}
 
 # amd64
 
 build-amd64-linux-gnu:
-  FROM +base-amd64-unknown-linux-gnu
-
-  WORKDIR /src
+  FROM +deps-amd64-linux-gnu
   COPY --dir .cargo src Cargo.lock Cargo.toml /src
-
-  RUN \
-    --mount=type=cache,target=$HOME/.cargo/bin \
-    --mount=type=cache,target=$HOME/.cargo/.crates2.json \
-    --mount=type=cache,target=$HOME/.cargo/.crates.toml \
-    --mount=type=cache,target=$HOME/.cargo/git \
-    --mount=type=cache,target=$HOME/.cargo/registry/cache \
-    --mount=type=cache,target=$HOME/.cargo/registry/index \
-    --mount=type=cache,target=/src/target \
-    cargo build --target ${target} --release --package ${package} --locked --bin ${package} \
-    && mkdir -p /src/out \
-    && cp /src/target/${target}/release/${package} /src/out/${package}
-
-    SAVE ARTIFACT /src/out/${package}
+  RUN cargo build --target ${target} --release --package ${package} --locked --bin ${package}
+  SAVE ARTIFACT target/${target}/release/${package}
 
 build-amd64-linux-gnu-vendored:
-  FROM +base-amd64-unknown-linux-gnu
-
-  WORKDIR /src
+  FROM +deps-amd64-linux-gnu-vendored
   COPY --dir .cargo src Cargo.lock Cargo.toml /src
-
-  RUN \
-    --mount=type=cache,target=$HOME/.cargo/bin \
-    --mount=type=cache,target=$HOME/.cargo/.crates2.json \
-    --mount=type=cache,target=$HOME/.cargo/.crates.toml \
-    --mount=type=cache,target=$HOME/.cargo/git \
-    --mount=type=cache,target=$HOME/.cargo/registry/cache \
-    --mount=type=cache,target=$HOME/.cargo/registry/index \
-    --mount=type=cache,target=/src/target \
-    cargo build --target ${target} --release --package ${package} --locked --bin ${package}  --features vendored \
-    && mkdir -p /src/out \
-    && cp /src/target/${target}/release/${package} /src/out/${package}
-
-    SAVE ARTIFACT /src/out/${package}
+  RUN cargo build --target ${target} --release --package ${package} --locked --bin ${package} --features vendored
+  SAVE ARTIFACT target/${target}/release/${package}
 
 build-amd64-linux-musl-static:
-  FROM +base-amd64-unknown-linux-musl
-
-  WORKDIR /src
+  FROM +deps-amd64-linux-musl-static
   COPY --dir .cargo src Cargo.lock Cargo.toml /src
-
-  RUN \
-    --mount=type=cache,target=$HOME/.cargo/bin \
-    --mount=type=cache,target=$HOME/.cargo/.crates2.json \
-    --mount=type=cache,target=$HOME/.cargo/.crates.toml \
-    --mount=type=cache,target=$HOME/.cargo/git \
-    --mount=type=cache,target=$HOME/.cargo/registry/cache \
-    --mount=type=cache,target=$HOME/.cargo/registry/index \
-    --mount=type=cache,target=/src/target \
-    cargo build --target ${target} --release --package ${package} --locked --bin ${package} --features vendored \
-    && mkdir -p /src/out \
-    && cp /src/target/${target}/release/${package} /src/out/${package}
-
-    SAVE ARTIFACT /src/out/${package}
-
+  RUN cargo build --target ${target} --release --package ${package} --locked --bin ${package} --features vendored
+  SAVE ARTIFACT target/${target}/release/${package}
 
 ###########################################################################
 # VERSION HELPER
