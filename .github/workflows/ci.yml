@@ -36,6 +36,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install lld (linux)
+        run: sudo apt-get install -yq lld
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
       - name: Lint
         run: cargo clippy --locked -- -D warnings
 
