@@ -45,7 +45,8 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.repository == 'YoloDev/enet-mqtt'
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - run: earthly --ci --push --remote-cache=ghcr.io/yolodev/enet-mqtt:build-cache +all
+      - run: mkdir -p build
+      - run: earthly --push --remote-cache=ghcr.io/yolodev/enet-mqtt:build-cache --artifact "+all/*" build/
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:

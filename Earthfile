@@ -1,4 +1,5 @@
 ARG package=enet-mqtt
+FROM busybox
 
 ###########################################################################
 # BASE IMAGES
@@ -62,6 +63,12 @@ base-amd64-unknown-linux-musl:
   WORKDIR /src
   SAVE IMAGE --cache-hint
 
+base-all:
+  BUILD +base-aarch64-unknown-linux-gnu
+  BUILD +base-aarch64-unknown-linux-musl
+  BUILD +base-amd64-unknown-linux-gnu
+  BUILD +base-amd64-unknown-linux-musl
+
 ###########################################################################
 # CHEF TARGETS
 ###########################################################################
@@ -89,6 +96,12 @@ chef-amd64-unknown-linux-musl:
   FROM +base-amd64-unknown-linux-musl
   RUN cargo install cargo-chef --locked
   SAVE IMAGE --cache-hint
+
+chef-all:
+  BUILD +chef-aarch64-unknown-linux-gnu
+  BUILD +chef-aarch64-unknown-linux-musl
+  BUILD +chef-amd64-unknown-linux-gnu
+  BUILD +chef-amd64-unknown-linux-musl
 
 ###########################################################################
 # PLAN TARGETS
@@ -123,6 +136,12 @@ plan-amd64-unknown-linux-musl:
   RUN cargo chef prepare --recipe-path recipe.json
   SAVE ARTIFACT recipe.json
   SAVE IMAGE --cache-hint
+
+plan-all:
+  BUILD +plan-aarch64-unknown-linux-gnu
+  BUILD +plan-aarch64-unknown-linux-musl
+  BUILD +plan-amd64-unknown-linux-gnu
+  BUILD +plan-amd64-unknown-linux-musl
 
 ###########################################################################
 # DEPS TARGETS
@@ -165,6 +184,14 @@ deps-amd64-linux-musl-static:
   COPY +plan-amd64-unknown-linux-musl/recipe.json .
   RUN cargo chef cook --recipe-path recipe.json --target ${target} --release --package ${package} --features vendored
   SAVE IMAGE --cache-hint
+
+deps-all:
+  BUILD +deps-aarch64-linux-gnu
+  BUILD +deps-aarch64-linux-gnu-vendored
+  BUILD +deps-aarch64-linux-musl-static
+  BUILD +deps-amd64-linux-gnu
+  BUILD +deps-amd64-linux-gnu-vendored
+  BUILD +deps-amd64-linux-musl-static
 
 ###########################################################################
 # BUILD TARGETS
@@ -235,7 +262,7 @@ aarch64-linux-gnu:
   RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
   RUN rm .version
 
-  SAVE ARTIFACT /out/* AS LOCAL build/
+  SAVE ARTIFACT /out/*
 
 aarch64-linux-gnu-vendored:
   FROM +version
@@ -246,7 +273,7 @@ aarch64-linux-gnu-vendored:
   RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
   RUN rm .version
 
-  SAVE ARTIFACT /out/* AS LOCAL build/
+  SAVE ARTIFACT /out/*
 
 aarch64-linux-musl-static:
   FROM +version
@@ -257,7 +284,7 @@ aarch64-linux-musl-static:
   RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
   RUN rm .version
 
-  SAVE ARTIFACT /out/* AS LOCAL build/
+  SAVE ARTIFACT /out/*
 
 i686-linux-gnu:
   FROM +version
@@ -268,7 +295,7 @@ i686-linux-gnu:
   RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
   RUN rm .version
 
-  SAVE ARTIFACT /out/* AS LOCAL build/
+  SAVE ARTIFACT /out/*
 
 i686-linux-gnu-vendored:
   FROM +version
@@ -279,7 +306,7 @@ i686-linux-gnu-vendored:
   RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
   RUN rm .version
 
-  SAVE ARTIFACT /out/* AS LOCAL build/
+  SAVE ARTIFACT /out/*
 
 amd64-linux-gnu:
   FROM +version
@@ -290,7 +317,7 @@ amd64-linux-gnu:
   RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
   RUN rm .version
 
-  SAVE ARTIFACT /out/* AS LOCAL build/
+  SAVE ARTIFACT /out/*
 
 amd64-linux-gnu-vendored:
   FROM +version
@@ -301,7 +328,7 @@ amd64-linux-gnu-vendored:
   RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
   RUN rm .version
 
-  SAVE ARTIFACT /out/* AS LOCAL build/
+  SAVE ARTIFACT /out/*
 
 amd64-linux-musl-static:
   FROM +version
@@ -312,22 +339,28 @@ amd64-linux-musl-static:
   RUN sha256sum "${package}-v$(cat .version)-${platform}" > "${package}-v$(cat .version)-${platform}".sha256.txt
   RUN rm .version
 
-  SAVE ARTIFACT /out/* AS LOCAL build/
+  SAVE ARTIFACT /out/*
 
 ###########################################################################
 # GROUP TARGETS
 ###########################################################################
 
 aarch64:
-  BUILD +aarch64-linux-gnu
-  BUILD +aarch64-linux-gnu-vendored
-  BUILD +aarch64-linux-musl-static
+  COPY +aarch64-linux-gnu/* /out/
+  COPY +aarch64-linux-gnu-vendored/* /out/
+  COPY +aarch64-linux-musl-static/* /out/
+
+  SAVE ARTIFACT /out/*
 
 amd64:
-  BUILD +amd64-linux-gnu
-  BUILD +amd64-linux-gnu-vendored
-  BUILD +amd64-linux-musl-static
+  COPY +amd64-linux-gnu/* /out/
+  COPY +amd64-linux-gnu-vendored/* /out/
+  COPY +amd64-linux-musl-static/* /out/
+
+  SAVE ARTIFACT /out/*
 
 all:
-  BUILD +aarch64
-  BUILD +amd64
+  COPY +aarch64/* /out/
+  COPY +amd64/* /out/
+
+  SAVE ARTIFACT /out/*
