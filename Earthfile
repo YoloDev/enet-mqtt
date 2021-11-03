@@ -77,24 +77,24 @@ base-all:
 
 chef-aarch64-unknown-linux-gnu:
   FROM +base-aarch64-unknown-linux-gnu
-  RUN cargo install cargo-chef --locked
+  RUN cargo install cargo-chef
   SAVE IMAGE --cache-hint
 
 chef-aarch64-unknown-linux-musl:
   FROM +base-aarch64-unknown-linux-musl
-  RUN cargo install cargo-chef --locked
+  RUN cargo install cargo-chef
   SAVE IMAGE --cache-hint
 
 # amd64
 
 chef-amd64-unknown-linux-gnu:
   FROM +base-amd64-unknown-linux-gnu
-  RUN cargo install cargo-chef --locked
+  RUN cargo install cargo-chef
   SAVE IMAGE --cache-hint
 
 chef-amd64-unknown-linux-musl:
   FROM +base-amd64-unknown-linux-musl
-  RUN cargo install cargo-chef --locked
+  RUN cargo install cargo-chef
   SAVE IMAGE --cache-hint
 
 chef-all:
