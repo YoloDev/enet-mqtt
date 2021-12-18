@@ -12,7 +12,7 @@ clap = { version = "3.0.0-rc.7", features = ["derive", "env"] }
 color-eyre = "0.5.11"
 enet-client = "0.2.1"
 eventuals = "0.6.6"
-futures = "0.3.18"
+futures = "0.3.19"
 lazy_static = "1.4.0"
 matchit = "0.4.4"
 paho-mqtt = { version = "0.9.1" }
