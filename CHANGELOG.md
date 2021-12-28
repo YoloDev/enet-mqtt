@@ -1,5 +1,19 @@
 # Changelog
 
+### [0.2.2](https://www.github.com/YoloDev/enet-mqtt/compare/enet-mqtt-v0.2.1...enet-mqtt-v0.2.2) (2021-12-28)
+
+
+### Dependencies
+
+* update rust crate clap to 3.0.0-rc.5 ([#33](https://www.github.com/YoloDev/enet-mqtt/issues/33)) ([40a4bb2](https://www.github.com/YoloDev/enet-mqtt/commit/40a4bb24e6c18ac435c273af22dcdfdc17b946bd))
+* update rust crate clap to 3.0.0-rc.7 ([#37](https://www.github.com/YoloDev/enet-mqtt/issues/37)) ([100eb2a](https://www.github.com/YoloDev/enet-mqtt/commit/100eb2ac299462cc67a1da0b23add7e42835e9f0))
+* update rust crate clap to 3.0.0-rc.8 ([#40](https://www.github.com/YoloDev/enet-mqtt/issues/40)) ([fa57b33](https://www.github.com/YoloDev/enet-mqtt/commit/fa57b333f754edde8280ffcb9cc4d53a90b2535f))
+* update rust crate clap to 3.0.0-rc.9 ([#42](https://www.github.com/YoloDev/enet-mqtt/issues/42)) ([c675e3e](https://www.github.com/YoloDev/enet-mqtt/commit/c675e3ed1235b459e0ab666b98d64cdcf54afdc8))
+* update rust crate futures to 0.3.19 ([#39](https://www.github.com/YoloDev/enet-mqtt/issues/39)) ([c776d7b](https://www.github.com/YoloDev/enet-mqtt/commit/c776d7b176eb9462d22b831d916b7697e286702a))
+* update rust crate serde to 1.0.132 ([#38](https://www.github.com/YoloDev/enet-mqtt/issues/38)) ([6890a90](https://www.github.com/YoloDev/enet-mqtt/commit/6890a90d5dc571ccdb36482233b4e1ff8dd1460c))
+* update rust crate tokio to 1.15.0 ([#35](https://www.github.com/YoloDev/enet-mqtt/issues/35)) ([3426d43](https://www.github.com/YoloDev/enet-mqtt/commit/3426d431b55748a70d4e75300ea808aec3f73991))
+* update rust crate tracing-subscriber to 0.3.4 ([#41](https://www.github.com/YoloDev/enet-mqtt/issues/41)) ([a934e24](https://www.github.com/YoloDev/enet-mqtt/commit/a934e24bcf1a6c10779b1f639f1a6b32867d986d))
+
 ### [0.2.1](https://www.github.com/YoloDev/enet-mqtt/compare/enet-mqtt-v0.2.0...enet-mqtt-v0.2.1) (2021-12-14)
 
 
