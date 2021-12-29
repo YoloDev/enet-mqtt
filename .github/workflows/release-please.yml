@@ -15,7 +15,7 @@ jobs:
       statuses: write
 
     steps:
-      - uses: GoogleCloudPlatform/release-please-action@v2
+      - uses: GoogleCloudPlatform/release-please-action@v3
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
