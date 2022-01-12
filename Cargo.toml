@@ -8,7 +8,7 @@ resolver = "2"
 
 [dependencies]
 async-stream = "0.3.2"
-clap = { version = "3.0.6", features = ["derive", "env"] }
+clap = { version = "3.0.7", features = ["derive", "env"] }
 color-eyre = "0.5.11"
 enet-client = "0.2.1"
 eventuals = "0.6.6"
