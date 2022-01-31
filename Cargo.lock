@@ -608,9 +608,9 @@ dependencies = [
 
 [[package]]
 name = "matchit"
-version = "0.4.4"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58b6f41fdfbec185dd3dff58b51e323f5bc61692c0de38419a957b0dcfccca3c"
+checksum = "d316c11deb69b8d5df061aa9e214e48a757f618b9c4b3b01b00fe555e4b32128"
 
 [[package]]
 name = "memchr"
