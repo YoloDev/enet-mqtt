@@ -14,7 +14,7 @@ enet-client = "0.2.1"
 eventuals = "0.6.6"
 futures = "0.3.19"
 lazy_static = "1.4.0"
-matchit = "0.4.4"
+matchit = "0.4.5"
 paho-mqtt = { version = "0.10.0" }
 serde = "1.0.136"
 serde_json = "1.0.78"
