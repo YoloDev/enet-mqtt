@@ -20,7 +20,7 @@ serde = "1.0.136"
 serde_json = "1.0.78"
 tokio = { version = "1.16.1", features = ["full"] }
 tracing = "0.1.30"
-tracing-subscriber = { version = "0.3.7", features = ["env-filter", "json"] }
+tracing-subscriber = { version = "0.3.8", features = ["env-filter", "json"] }
 
 [target.'cfg(windows)'.dependencies]
 paho-mqtt = { version = "0.10.0", features = ["vendored-ssl"] }
