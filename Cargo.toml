@@ -18,7 +18,7 @@ matchit = "0.4.6"
 paho-mqtt = { version = "0.10.0" }
 serde = "1.0.136"
 serde_json = "1.0.79"
-tokio = { version = "1.16.1", features = ["full"] }
+tokio = { version = "1.17.0", features = ["full"] }
 tracing = "0.1.30"
 tracing-subscriber = { version = "0.3.8", features = ["env-filter", "json"] }
 
