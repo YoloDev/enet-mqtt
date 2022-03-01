@@ -1,5 +1,43 @@
 # Changelog
 
+### [0.2.4](https://github.com/YoloDev/enet-mqtt/compare/enet-mqtt-v0.2.3...enet-mqtt-v0.2.4) (2022-03-01)
+
+
+### Dependencies
+
+* update rust crate clap to 3.0.1 ([#52](https://github.com/YoloDev/enet-mqtt/issues/52)) ([79675d8](https://github.com/YoloDev/enet-mqtt/commit/79675d8a43216c37362c02e5637077a27baaee5e))
+* update rust crate clap to 3.0.10 ([#64](https://github.com/YoloDev/enet-mqtt/issues/64)) ([a3c1b23](https://github.com/YoloDev/enet-mqtt/commit/a3c1b23983c66ef0db4d6735f2800b5ca94d1999))
+* update rust crate clap to 3.0.11 ([#72](https://github.com/YoloDev/enet-mqtt/issues/72)) ([6d3d649](https://github.com/YoloDev/enet-mqtt/commit/6d3d64999b9c2a80d6f6bfc77d3a4d5d08f93c15))
+* update rust crate clap to 3.0.12 ([#73](https://github.com/YoloDev/enet-mqtt/issues/73)) ([82ca847](https://github.com/YoloDev/enet-mqtt/commit/82ca8474ec109274e880dec99d0a4bbdc42f1616))
+* update rust crate clap to 3.0.13 ([#78](https://github.com/YoloDev/enet-mqtt/issues/78)) ([4a7f6df](https://github.com/YoloDev/enet-mqtt/commit/4a7f6dffc34703b591aa8ec7e128c62d4a70e5a4))
+* update rust crate clap to 3.0.14 ([#83](https://github.com/YoloDev/enet-mqtt/issues/83)) ([f932b1e](https://github.com/YoloDev/enet-mqtt/commit/f932b1e638c0cead04d80e04260684f1a8d3a942))
+* update rust crate clap to 3.0.4 ([#54](https://github.com/YoloDev/enet-mqtt/issues/54)) ([94a670a](https://github.com/YoloDev/enet-mqtt/commit/94a670a2dd6dd32e5face34f46fa74c83e12fe98))
+* update rust crate clap to 3.0.5 ([#55](https://github.com/YoloDev/enet-mqtt/issues/55)) ([1b450ef](https://github.com/YoloDev/enet-mqtt/commit/1b450ef1ab0657cfcf672f3894365f279b27e454))
+* update rust crate clap to 3.0.6 ([#56](https://github.com/YoloDev/enet-mqtt/issues/56)) ([1faa24f](https://github.com/YoloDev/enet-mqtt/commit/1faa24fcac49740bf8db664819d7294717627ae2))
+* update rust crate clap to 3.0.7 ([#57](https://github.com/YoloDev/enet-mqtt/issues/57)) ([4819305](https://github.com/YoloDev/enet-mqtt/commit/4819305ccc1901eaabfc8d01ff4a262bb4578e32))
+* update rust crate clap to 3.0.8 ([#62](https://github.com/YoloDev/enet-mqtt/issues/62)) ([92c1840](https://github.com/YoloDev/enet-mqtt/commit/92c184067d57d72007cbc13cfaad7a43f5946239))
+* update rust crate clap to 3.0.9 ([#63](https://github.com/YoloDev/enet-mqtt/issues/63)) ([05af07d](https://github.com/YoloDev/enet-mqtt/commit/05af07d80d7293a9948e890dde29dccee109a887))
+* update rust crate color-eyre to 0.6.0 ([#58](https://github.com/YoloDev/enet-mqtt/issues/58)) ([3f76861](https://github.com/YoloDev/enet-mqtt/commit/3f76861ad4815f418651ada5a5b820148a16dfc6))
+* update rust crate futures to 0.3.21 ([#86](https://github.com/YoloDev/enet-mqtt/issues/86)) ([1d86f2b](https://github.com/YoloDev/enet-mqtt/commit/1d86f2b64d15bbc380dad22716e6b94016a78b05))
+* update rust crate matchit to 0.4.5 ([#81](https://github.com/YoloDev/enet-mqtt/issues/81)) ([6d15f0d](https://github.com/YoloDev/enet-mqtt/commit/6d15f0d3cc8cfbeb3a373d3f61b15b06be7ecc9f))
+* update rust crate matchit to 0.4.6 ([#82](https://github.com/YoloDev/enet-mqtt/issues/82)) ([a04848f](https://github.com/YoloDev/enet-mqtt/commit/a04848f94b0b761c656eec1941d440382f090965))
+* update rust crate paho-mqtt to 0.10.0 ([#77](https://github.com/YoloDev/enet-mqtt/issues/77)) ([68095fe](https://github.com/YoloDev/enet-mqtt/commit/68095fe5a46573fc183e52387b86383e7faef670))
+* update rust crate serde to 1.0.134 ([#67](https://github.com/YoloDev/enet-mqtt/issues/67)) ([8bb604f](https://github.com/YoloDev/enet-mqtt/commit/8bb604f0ea2b191520cfda90f5620bd44a14e13a))
+* update rust crate serde to 1.0.135 ([#70](https://github.com/YoloDev/enet-mqtt/issues/70)) ([c2e2013](https://github.com/YoloDev/enet-mqtt/commit/c2e20139717b5b74a853b2f4c1743f698543b16f))
+* update rust crate serde to 1.0.136 ([#75](https://github.com/YoloDev/enet-mqtt/issues/75)) ([d4b4341](https://github.com/YoloDev/enet-mqtt/commit/d4b4341784ea328b1ee5b358f40e419c38a6edf4))
+* update rust crate serde_json to 1.0.75 ([#61](https://github.com/YoloDev/enet-mqtt/issues/61)) ([7f9bee2](https://github.com/YoloDev/enet-mqtt/commit/7f9bee2c12d35f2eab4719631ae61a1b68c9692a))
+* update rust crate serde_json to 1.0.76 ([#68](https://github.com/YoloDev/enet-mqtt/issues/68)) ([ab8d69e](https://github.com/YoloDev/enet-mqtt/commit/ab8d69e57229fca86a670e306b4986de448792aa))
+* update rust crate serde_json to 1.0.78 ([#71](https://github.com/YoloDev/enet-mqtt/issues/71)) ([7cfd61e](https://github.com/YoloDev/enet-mqtt/commit/7cfd61eeb8ef88fead444804b8e29ce1cda06502))
+* update rust crate serde_json to 1.0.79 ([#87](https://github.com/YoloDev/enet-mqtt/issues/87)) ([45be0eb](https://github.com/YoloDev/enet-mqtt/commit/45be0eb89097259ede80cbef4dec04b1abd74cc1))
+* update rust crate tokio to 1.16.0 ([#79](https://github.com/YoloDev/enet-mqtt/issues/79)) ([6ae9c7b](https://github.com/YoloDev/enet-mqtt/commit/6ae9c7b110cb72f89a2754a45f3a8e0535fca4f3))
+* update rust crate tokio to 1.16.1 ([#80](https://github.com/YoloDev/enet-mqtt/issues/80)) ([58ecdf8](https://github.com/YoloDev/enet-mqtt/commit/58ecdf876b7af82a74e2dc43bdec6cc4350d05d3))
+* update rust crate tokio to 1.17.0 ([#89](https://github.com/YoloDev/enet-mqtt/issues/89)) ([56fcbd8](https://github.com/YoloDev/enet-mqtt/commit/56fcbd8b207decacc7f9c49db06c22fe4155001b))
+* update rust crate tracing to 0.1.30 ([#84](https://github.com/YoloDev/enet-mqtt/issues/84)) ([71354b6](https://github.com/YoloDev/enet-mqtt/commit/71354b6fea74d8ed5f4aebd7553005d9dffa1684))
+* update rust crate tracing-subscriber to 0.3.6 ([#60](https://github.com/YoloDev/enet-mqtt/issues/60)) ([3dc2b81](https://github.com/YoloDev/enet-mqtt/commit/3dc2b81b6f457b1709ad76df98c21c39579dcde7))
+* update rust crate tracing-subscriber to 0.3.7 ([#76](https://github.com/YoloDev/enet-mqtt/issues/76)) ([d2d810e](https://github.com/YoloDev/enet-mqtt/commit/d2d810eada81d75801265a981b68cd1d6596f9ce))
+* update rust crate tracing-subscriber to 0.3.8 ([#85](https://github.com/YoloDev/enet-mqtt/issues/85)) ([d80f0a4](https://github.com/YoloDev/enet-mqtt/commit/d80f0a427513bdf2a8952cfa9b679e9d2c833469))
+* update tracing packages ([#90](https://github.com/YoloDev/enet-mqtt/issues/90)) ([ac449de](https://github.com/YoloDev/enet-mqtt/commit/ac449de652ac9b18125ecd850f36d516443f160b))
+
 ### [0.2.3](https://github.com/YoloDev/enet-mqtt/compare/enet-mqtt-v0.2.2...enet-mqtt-v0.2.3) (2022-01-03)
 
 
