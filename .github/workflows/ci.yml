@@ -29,7 +29,7 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global fetch.parallel 32
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v1
       - uses: extractions/setup-just@v1

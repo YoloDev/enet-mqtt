@@ -33,7 +33,7 @@ jobs:
           fi
           echo tag=$TAG_NAME
           echo ::set-output name=tag::$TAG_NAME
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up QEMU
