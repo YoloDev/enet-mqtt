@@ -37,7 +37,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
       - uses: earthly/actions/setup-earthly@v1
       - run: earthly --version
 
