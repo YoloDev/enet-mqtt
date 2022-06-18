@@ -380,9 +380,9 @@ checksum = "77f3309417938f28bf8228fcff79a4a37103981e3e186d2ccd19c74b38f4eb71"
 
 [[package]]
 name = "eventuals"
-version = "0.6.6"
+version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2a24bc5e558b5c19db9777dafb665e35f8fe2faa70f1fbfafd6ccb3b908a8ff"
+checksum = "0450e5c57135f799007162ff8beba7b2809d4a018cf9cdcbca2c319a73d9d8ee"
 dependencies = [
  "by_address",
  "futures",
