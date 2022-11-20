@@ -17,7 +17,7 @@ lazy_static = "1.4.0"
 matchit = "0.4.6"
 paho-mqtt = { version = "0.10.0" }
 serde = "1.0.136"
-serde_json = "1.0.79"
+serde_json = "1.0.88"
 tokio = { version = "1.17.0", features = ["full"] }
 tracing = "0.1.31"
 tracing-subscriber = { version = "0.3.9", features = ["env-filter", "json"] }
