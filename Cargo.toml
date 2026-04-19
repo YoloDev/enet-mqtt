@@ -7,26 +7,26 @@ resolver = "2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-stream = "0.3.2"
-clap = { version = "3.0.14", features = ["derive", "env"] }
-color-eyre = "0.6.0"
-enet-client = "0.2.1"
-eventuals = "0.6.6"
-futures = "0.3.21"
-lazy_static = "1.4.0"
-matchit = "0.4.6"
-paho-mqtt = { version = "0.10.0" }
-serde = "1.0.136"
-serde_json = "1.0.79"
-tokio = { version = "1.17.0", features = ["full"] }
+async-stream = "=0.3.2"
+clap = { version = "=3.0.14", features = ["derive", "env"] }
+color-eyre = "=0.6.0"
+enet-client = "=0.2.1"
+eventuals = "=0.6.6"
+futures = "=0.3.21"
+lazy_static = "=1.4.0"
+matchit = "=0.4.6"
+paho-mqtt = { version = "=0.10.0" }
+serde = "=1.0.136"
+serde_json = "=1.0.79"
+tokio = { version = "=1.17.0", features = ["full"] }
 tracing = "0.1.31"
 tracing-subscriber = { version = "0.3.9", features = ["env-filter", "json"] }
 
 [target.'cfg(windows)'.dependencies]
-paho-mqtt = { version = "0.10.0", features = ["vendored-ssl"] }
+paho-mqtt = { version = "=0.10.0", features = ["vendored-ssl"] }
 
 [dev-dependencies]
-serde_test = "1.0.136"
+serde_test = "=1.0.136"
 
 [profile.release]
 lto = "thin"
